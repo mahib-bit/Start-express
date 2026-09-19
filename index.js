@@ -72,6 +72,25 @@ app.post ('/users', (req ,res) => {
     res.status(201).json(newUser);
 })
 
+app.delete('/users/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const userIndex = users.findIndex(user => user.id === id);
+    
+    if(userIndex === -1){
+        return res.status(404).json({
+            message: "User not found"
+        })
+    }
+
+    const deletedUser = users.splice(userIndex, 1);
+
+    res.json({
+        message : 'User deleted Successfully',
+        user: deletedUser[0]
+    })
+})
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
