@@ -34,7 +34,7 @@ app.get('/users', (req, res) => {
 
     if(name){
         const filteredUsers = users.filter(user =>
-            user.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+            user.name.toLocaleLowerCase().includes(name.toLocaleLowerCase())
         )
         return res.json(filteredUsers);
     }
