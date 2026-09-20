@@ -30,6 +30,15 @@ app.get('/', (req, res) => {
 });
 
 app.get('/users', (req, res) => {
+    const name = req.query.name;
+
+    if(name){
+        const filteredUsers = users.filter(user =>
+            user.name.toLocaleLowerCase() === name.toLocaleLowerCase()
+        )
+        return res.json(filteredUsers);
+    }
+
     res.json(users);
 });
 
@@ -45,6 +54,16 @@ app.get('/users/:id', (req, res) => {
     }
 
     res.json({ user });
+})
+
+app.get('/search', (req, res) =>{
+    const name = req.query.name;
+    const age = req.query.age;
+
+    res.json({
+        name: name,
+        age: age
+    })
 })
 
 app.put('/users/:id', (req, res) => {
