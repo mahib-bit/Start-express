@@ -32,6 +32,7 @@ app.get('/', (req, res) => {
 app.get('/users', (req, res) => {
     const name = req.query.name;
     const email = req.query.email;
+    const limit = parseInt(req.query.limit);
 
     let filteredUsers = users;
 
@@ -45,6 +46,18 @@ app.get('/users', (req, res) => {
         filteredUsers = filteredUsers.filter(user =>
             user.email.toLowerCase().includes(email.toLowerCase())
         );
+    }
+
+    if(req.query.limit) {
+        const limit = parseInt(req.query.limit);
+
+        if(isNaN(limit) || limit <= 0) {
+            return res.status(400).json({
+                message: 'Limit must be a positive number'
+            })
+        }
+
+        filteredUsers = filteredUsers.slice(0 , limit);
     }
 
     res.json(filteredUsers);
