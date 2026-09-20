@@ -33,6 +33,7 @@ app.get('/users', (req, res) => {
     const name = req.query.name;
     const email = req.query.email;
     const limit = parseInt(req.query.limit);
+    const sort = req.query.sort;
 
     let filteredUsers = users;
 
@@ -58,6 +59,12 @@ app.get('/users', (req, res) => {
         }
 
         filteredUsers = filteredUsers.slice(0 , limit);
+    }
+
+    if (sort === 'name'){
+        filteredUsers.sort((a,b) =>
+            a.name.localeCompare(b.name)
+        )
     }
 
     res.json(filteredUsers);
