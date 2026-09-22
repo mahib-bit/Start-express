@@ -29,6 +29,12 @@ app.get('/', (req, res) => {
     res.send('Hello from my Express server!');
 });
 
+const checkSomething = (req, res, next) => {
+    console.log('Route-specific middleware running');
+
+    next();
+};
+
 app.get('/users', (req, res) => {
     const name = req.query.name;
     const email = req.query.email;
@@ -49,20 +55,20 @@ app.get('/users', (req, res) => {
         );
     }
 
-    if(req.query.limit) {
+    if (req.query.limit) {
         const limit = parseInt(req.query.limit);
 
-        if(isNaN(limit) || limit <= 0) {
+        if (isNaN(limit) || limit <= 0) {
             return res.status(400).json({
                 message: 'Limit must be a positive number'
             })
         }
 
-        filteredUsers = filteredUsers.slice(0 , limit);
+        filteredUsers = filteredUsers.slice(0, limit);
     }
 
-    if (sort === 'name'){
-        filteredUsers.sort((a,b) =>
+    if (sort === 'name') {
+        filteredUsers.sort((a, b) =>
             a.name.localeCompare(b.name)
         )
     }
@@ -70,7 +76,7 @@ app.get('/users', (req, res) => {
     res.json(filteredUsers);
 });
 
-app.get('/users/:id', (req, res) => {
+app.get('/users/:id', checkSomething, (req, res) => {
     const id = parseInt(req.params.id);
 
     const user = users.find(user => user.id === id);
