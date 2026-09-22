@@ -43,14 +43,33 @@ const checkSomething = (req, res, next) => {
 };
 
 const checkAccess = (req, res, next) => {
-    const allowed = false;
+    const allowed = true;
 
     if(!allowed) {
-        return res.status(404).json({
+        return res.status(403).json({
             message:'Access denied'
         });
     };
 
+    next();
+}
+
+const checkHeader = (req, res, next) => {
+    const user = req.headers['x-user'];
+
+    console.log('User:', user);
+
+    next();
+};
+
+const checkUser = (req, res, next) => {
+    const user = req.headers['x-user'];
+
+    if(!user){
+        return res.status(401).json({
+            message: 'User header is required'
+        })
+    }
     next();
 }
 
@@ -95,7 +114,7 @@ app.get('/users', (req, res) => {
     res.json(filteredUsers);
 });
 
-app.get('/users/:id', checkAccess, (req, res) => {
+app.get('/users/:id', checkAccess,checkHeader, checkUser,(req, res) => {
     const id = parseInt(req.params.id);
 
     const user = users.find(user => user.id === id);
