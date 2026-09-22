@@ -29,11 +29,30 @@ app.get('/', (req, res) => {
     res.send('Hello from my Express server!');
 });
 
+app.use((req, res, next) => {
+    console.log('Method:', req.method);
+    console.log('URL:', req.url);
+
+    next();
+});
+
 const checkSomething = (req, res, next) => {
     console.log('Route-specific middleware running');
 
     next();
 };
+
+const checkAccess = (req, res, next) => {
+    const allowed = false;
+
+    if(!allowed) {
+        return res.status(404).json({
+            message:'Access denied'
+        });
+    };
+
+    next();
+}
 
 app.get('/users', (req, res) => {
     const name = req.query.name;
@@ -76,7 +95,7 @@ app.get('/users', (req, res) => {
     res.json(filteredUsers);
 });
 
-app.get('/users/:id', checkSomething, (req, res) => {
+app.get('/users/:id', checkAccess, (req, res) => {
     const id = parseInt(req.params.id);
 
     const user = users.find(user => user.id === id);
