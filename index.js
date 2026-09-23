@@ -1,29 +1,14 @@
-
 const express = require('express');
 
 const app = express();
+
+const usersRouter = require('./routes/users');
 
 app.use(express.json());
 
 const port = 3000;
 
-const users = [
-    {
-        id: 1,
-        name: 'Mahib',
-        email: 'mahib@example.com'
-    },
-    {
-        id: 2,
-        name: 'Rahim',
-        email: 'rahim@example.com'
-    },
-    {
-        id: 3,
-        name: 'Karim',
-        email: 'karim@example.com'
-    }
-];
+app.use('/users' ,usersRouter);
 
 app.get('/', (req, res) => {
     res.send('Hello from my Express server!');
@@ -54,6 +39,17 @@ const checkAccess = (req, res, next) => {
     next();
 }
 
+const validateUser = (req, res, next) =>{
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+        return res.status(400).json({
+            message: 'Name and email are required'
+        })
+    }
+    next();
+}
+
 const checkHeader = (req, res, next) => {
     const user = req.headers['x-user'];
 
@@ -73,59 +69,13 @@ const checkUser = (req, res, next) => {
     next();
 }
 
-app.get('/users', (req, res) => {
-    const name = req.query.name;
-    const email = req.query.email;
-    const limit = parseInt(req.query.limit);
-    const sort = req.query.sort;
-
-    let filteredUsers = users;
-
-    if (name) {
-        filteredUsers = filteredUsers.filter(user =>
-            user.name.toLowerCase().includes(name.toLowerCase())
-        );
+app.get('/server-error',(req,res,next) => {
+    try {
+        throw new Error('Database connection failed');
     }
-
-    if (email) {
-        filteredUsers = filteredUsers.filter(user =>
-            user.email.toLowerCase().includes(email.toLowerCase())
-        );
+    catch (error) {
+        next(error);
     }
-
-    if (req.query.limit) {
-        const limit = parseInt(req.query.limit);
-
-        if (isNaN(limit) || limit <= 0) {
-            return res.status(400).json({
-                message: 'Limit must be a positive number'
-            })
-        }
-
-        filteredUsers = filteredUsers.slice(0, limit);
-    }
-
-    if (sort === 'name') {
-        filteredUsers.sort((a, b) =>
-            a.name.localeCompare(b.name)
-        )
-    }
-
-    res.json(filteredUsers);
-});
-
-app.get('/users/:id', checkAccess,checkHeader, checkUser,(req, res) => {
-    const id = parseInt(req.params.id);
-
-    const user = users.find(user => user.id === id);
-
-    if (!user) {
-        return res.status(404).json({
-            message: "User not found"
-        })
-    }
-
-    res.json({ user });
 })
 
 app.get('/search', (req, res) => {
@@ -136,6 +86,12 @@ app.get('/search', (req, res) => {
         name: name,
         age: age
     })
+})
+
+app.get('/error', (req,res,next)=> {
+    const error = new Error('Something broke!');
+
+    next(error)
 })
 
 app.put('/users/:id', (req, res) => {
@@ -155,7 +111,7 @@ app.put('/users/:id', (req, res) => {
     res.json(user);
 });
 
-app.post('/users', (req, res) => {
+app.post('/users',validateUser, (req, res) => {
     const newUser = req.body;
 
     users.push(newUser);
@@ -179,6 +135,14 @@ app.delete('/users/:id', (req, res) => {
     res.json({
         message: 'User deleted Successfully',
         user: deletedUser[0]
+    })
+})
+
+app.use((err, req, res, next) => {
+    console.log(err);
+
+    res.status(500).json({
+        message: "Something went wrong"
     })
 })
 
