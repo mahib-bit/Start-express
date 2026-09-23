@@ -5,18 +5,18 @@ const router = express.Router();
 const users = [
     {
         id: 1,
-        name: 'Mahib',
-        email: 'mahib@example.com'
+        name: 'Jonathan Vance',
+        email: 'j.vance@acme.corp'
     },
     {
         id: 2,
-        name: 'Rahim',
-        email: 'rahim@example.com'
+        name: 'Sarah Jenkins',
+        email: 's.jenkins@apex.io'
     },
     {
         id: 3,
-        name: 'Karim',
-        email: 'karim@example.com'
+        name: 'Marcus Sterling',
+        email: 'm.sterling@vertex.com'
     }
 ];
 
@@ -61,7 +61,7 @@ router.get('/', (req, res) => {
     res.json(filteredUsers);
 });
 
-router.get('/:id', checkAccess,checkHeader, checkUser,(req, res) => {
+router.get('/:id', (req, res) => {
     const id = parseInt(req.params.id);
 
     const user = users.find(user => user.id === id);
