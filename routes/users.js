@@ -20,6 +20,23 @@ const users = [
     }
 ];
 
+const {
+    checkAccess,
+    checkUser
+} = require('../middleware/userMiddleware');
+
+const validateUser = (req, res, next) => {
+    const { name, email } = req.body;
+
+    if (!name || !email) {
+        return res.status(400).json({
+            message: 'Name and email are required'
+        });
+    }
+
+    next();
+};
+
 router.get('/', (req, res) => {
     const name = req.query.name;
     const email = req.query.email;
@@ -61,19 +78,62 @@ router.get('/', (req, res) => {
     res.json(filteredUsers);
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', checkAccess, checkUser, (req, res) => {
     const id = parseInt(req.params.id);
 
     const user = users.find(user => user.id === id);
 
     if (!user) {
         return res.status(404).json({
-            message: "User not found"
-        })
+            message: 'User not found'
+        });
     }
 
     res.json({ user });
-})
+});
 
+router.post('/', validateUser, (req, res) => {
+    const newUser = req.body;
+
+    users.push(newUser);
+
+    res.status(201).json(newUser);
+});
+
+router.put('/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const user = users.find(user => user.id === id);
+
+    if (!user) {
+        return res.status(404).json({
+            message: 'User not found'
+        });
+    }
+
+    user.name = req.body.name;
+    user.email = req.body.email;
+
+    res.json(user);
+});
+
+router.delete('/:id', (req, res) => {
+    const id = parseInt(req.params.id);
+
+    const userIndex = users.findIndex(user => user.id === id);
+
+    if (userIndex === -1) {
+        return res.status(404).json({
+            message: 'User not found'
+        });
+    }
+
+    const deletedUser = users.splice(userIndex, 1);
+
+    res.json({
+        message: 'User deleted Successfully',
+        user: deletedUser[0]
+    });
+});
 
 module.exports = router;
